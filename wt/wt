@@ -1,0 +1,37 @@
+#!/usr/bin/python3
+# wt - Prints weather from the cmdline
+
+import json
+import requests
+import sys
+import datetime
+import os
+
+# Compute location from cmdline args
+if len(sys.argv) != 2:
+    print('Usage: wt location')
+    sys.exit()
+location = ' '.join(sys.argv[1:])
+
+today = datetime.date.today()
+tomorrow = today + datetime.timedelta(days=1)
+datomorrow = today + datetime.timedelta(days=2)
+
+appid = os.environ["APPID"]
+
+url = 'https://api.openweathermap.org/data/2.5/forecast?q=%s&APPID=%s&units=imperial' % (location, appid)
+response = requests.get(url)
+response.raise_for_status()
+
+weatherData = json.loads(response.text)
+w = weatherData['list']
+print()
+print('Current weather in %s:' % (location.capitalize()))
+
+for i in range(3):
+    if i == 1:
+        print(tomorrow.strftime('%A')+":")
+    elif i == 2:
+        print(datomorrow.strftime('%A')+":")
+    print(w[i]['weather'][0]['main'], '-', w[i]['weather'][0]['description'], '-', str(int(w[i]['main']['temp']))+"°F")
+    print()
